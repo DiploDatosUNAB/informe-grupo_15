@@ -1,6 +1,6 @@
 ---
-title: "titulo"
-author: "nombres"
+title: "tp_programacion_grupo15"
+author: "Geru y Juan"
 output: html_document
 ---
 
@@ -8,11 +8,15 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # Cargar los paquetes necesarios acá
+
+library(presentes)
+library(dplyr)
+
 ```
 
 
 ## Introducción
-
+completar
 
 
 ## Exploración de los datos
@@ -20,14 +24,31 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # Código para cargar o leer los datos
+
+parque_memoria<-presentes::parque_de_la_memoria
 ```
 
 
 
 ```{r}
-# Cödigo de R acá 
-# Agregá más bloques según sea necesario
+
+# nombres de las variables
+names(parque_memoria)
+
+#tipo de dato de las variables
+#str(parque_memoria)
+
+#ver cantidad de filas y columnas 
+
+nrow(parque_memoria)
+ncol(parque_memoria)
 ```
+
+
+```{r}
+parque_memoria<-select(parque_memoria,edad,ano_en_monumento,sexo)
+```
+
 
 
 
