@@ -16,7 +16,9 @@ library(dplyr)
 
 
 ## Introducción
-completar
+Se trata de datos sobre desaparecidos en los Gobiernos de facto de la última dictadura militar, recolectando información entre los años 1969 y 1983.
+Provienen de una página del Gobierno.
+Dicha información fue colectada y registrada por el Gobierno y procesada por Diego Koz.
 
 
 ## Exploración de los datos
@@ -27,7 +29,6 @@ completar
 
 parque_memoria<-presentes::parque_de_la_memoria
 ```
-
 
 
 ```{r}
@@ -49,9 +50,101 @@ ncol(parque_memoria)
 parque_memoria<-select(parque_memoria,edad,ano_en_monumento,sexo)
 ```
 
+# Vamos a filtrar los desaparecidos menores a 20 años de edad.
+```{r}
+filter(parque_memoria,edad<20)
+```
 
+
+# Vamos a obtener la cantidad de monumentos que se incorporaron al Parque en el año 1977.
+
+```{r}
+filter(parque_memoria,ano_en_monumento>1977)
+```
+
+#Sacamos la media y el desvio estandard de la edad de desaparecidos
+En función de que la columna de edad no es un campo numérico sino de caracter (incluyendo valores nulos), se aplicó la siguiente fórmula:
+
+```{r}
+parque_memoria <- filter(parque_memoria, !is.na(as.numeric(edad)))
+```
+```{r}
+summarise(parque_memoria, media_edad = mean(as.numeric(edad)))
+summarise(parque_memoria, desvio_st = sd(as.numeric(edad)))
+
+```
+
+# Volvemos a incorporar las tres variables a trabajar y a ordenar la edad de menor a mayor 
+
+```{r}
+parque_memoria <- filter(parque_memoria, !is.na(as.numeric(edad)))
+
+```
+```{r}
+parque_memoria|>
+  arrange(edad)
+```
+
+# Contamos las observaciones con n
+```{r}
+parque_memoria|>
+ summarise(n = n())
+```
+
+# Sacamos la cantidad de observaciones para la variable año en monumento
+
+```{r}
+parque_memoria|>
+group_by(ano_en_monumento)|>
+summarise(n = n())
+```
+
+# Sacamos la cantidad de observaciones para la variable sexo
+
+```{r}
+parque_memoria|>
+group_by(sexo)|>
+summarise(n = n())
+```
+
+
+# Sacamos la cantidad de observaciones para la variable edad
+
+```{r}
+parque_memoria|>
+group_by(edad)|>
+summarise(n = n())
+```
+
+
+
+#Rango ascendente de año en monumento
+```{r}
+parque_memoria|>
+group_by(ano_en_monumento)|>
+summarise(n = n())|>
+arrange(n)
+```
+
+#Rango descendente de año en monumento
+```{r}
+parque_memoria|>
+group_by(ano_en_monumento)|>
+summarise(n = n())|>
+arrange(desc(n))
+```
 
 
 ## Hipótesis
 
+# Vamos a calcular la hipotesis sobre si en el año 1976 (año en monumento) desaparecieron mas hombres o mujeres
 
+Mujeres desparecidas en el año 1976
+```{r}
+filter(parque_memoria, ano_en_monumento == 1976, sexo == "Femenino")
+```
+
+Hombres desparecidos en el año 1976
+```{r}
+filter(parque_memoria, ano_en_monumento == 1976, sexo == "Masculino")
+```
