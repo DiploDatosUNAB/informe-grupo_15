@@ -21,13 +21,15 @@ TRABAJO PRACTICO 1 y sus correcciones (Junio 2023):
 # **DESAPARECIDOS**
 
 
-## Analisis de la información del archivo Parque de la Memoria
+# Indice
+
+
+## Análisis de la información del archivo Parque de la Memoria
 
 
 ## Introducción
-Se trata de datos sobre desaparecidos en los Gobiernos de facto de la última dictadura militar, recolectando información entre los años 1969 y 1983.
-Provienen de una página del Gobierno.
-Dicha información fue colectada y registrada por el Gobierno y procesada por Diego Koz.
+Analizaremos datos correspondientes a personas desaparecidas en los Gobiernos de facto de la última dictadura militar entre los años 1969 y 1983.
+Dicha información fue colectada y publicada en una página web del Gobierno y fue procesada por Diego Koz.
 
 
 ## Exploración de los datos
@@ -52,7 +54,10 @@ names(parque_memoria)
 nrow(parque_memoria)
 ncol(parque_memoria)
 ```
-## Elegimos las columnas a analizar y seleccionamos las correspondientes a:
+## Análisis y selección
+
+De la totalidad de la información, seleccionamos los siguientes datos:
+
 1. Edad
 2. Año en monumento
 3. Sexo
@@ -66,113 +71,121 @@ parque_memoria <-select(parque_de_la_memoria,"edad","ano_en_monumento","sexo","n
  
 ```
 
-## Vamos a filtrar los desaparecidos menores a 20 años de edad
+## Conocemos la cantidad de desaparecidos menores a 20 años de edad
+```{r}
+filter(parque_memoria,edad<20)|>
+summarise(n = n())|>
+knitr::kable(col.names = c ("Cantidad"))
+```
+Como resultado del filtro aplicado, se puede constatar que la cantidad de desaparecidos menores a 20 años es de 871 personas.
+
+## Detallamos la composición etária del grupo:
 
 ```{r}
-
 parque_memoria|>
-filter(edad<20)|>
-knitr::kable(col.names = c ("Edad", "Ano en Monumento", "Sexo", "Nacionalidad", "Ocupacion", "Lugar de Secuestro"))
-
+group_by(edad)|>
+filter(edad %in% 1:19)|>
+summarise(n = n())|>
+knitr::kable(col.names = c ("Edad", "Cantidad"))
 ```
 
-Como resultado del filtro aplicado, se puede constatar que la cantidad de desaparecidos menores a 20 años es de 871 personas y a continuación estableceremos la variable correspondiente.
+En la tabla se puede observar cómo está compuesto el grupo de desaparecidos menores a 20 años, pudiendose evidenciar que la edad de 19 años contó con mayor cantidad de desaparecidos (271), seguida por las edades de 18 (183) y 17 años (97) respectivamente.
+
 
 ```{r}
+
 parque_memoria_menores20 <-filter(parque_memoria,edad<20)
+
 ```
 
-
-## Conocemos la totalidad de las ocupaciones entre los desaparecidos
+## Conocemos las diez ocupaciones con mayor índice de desaparecidos
 ```{r}
-parque_memoria_ocupaciones<- parque_memoria|>
+parque_memoria|>
 group_by(ocupaciones)|>
-summarise(n = n())
+summarise(n = n())|>
+arrange(desc(n), na.rm=TRUE)|>
+filter(n %in% 577:41)|>
+knitr::kable(col.names = c ("Ocupaciones", "Cantidad"))
 ```
-Se registra que algunas de las ocupaciones de los desaparecidos fueron:
 
-1. Obrero en Acindar
-2. Poeta periodista
-3. Abogada y docente
-4. Electricista
-5. Medico
-6. Soldado conscripto
-7. Pasante en Fábrica Buxton
-8. Actriz
-9. Agente de Policia
-10. Periodista
-
+Se puede constatar que el grupo de mayor cantidad de desaparecidos fueron aquellos que tenían como ocupación Estudiantes. Siendo que, los Estudiantes Universitarios (hombres y mujeres) ocuparon el primer lugar con un total de 906 desapariciones.
 
 ## Obtenemos la cantidad de monumentos que se incorporaron al Parque en el año 1977.
 
 
 ```{r}
 filter(parque_memoria,ano_en_monumento==1977)|>
-knitr::kable(col.names = c ("Edad", "Ano en Monumento", "Sexo", "Nacionalidad", "Ocupacion", "Lugar de Secuestro"))
+summarise(n = n())|>
+knitr::kable(col.names = c ("Cantidad"))
+
 ```
 
 Constatamos que la cantidad de monumentos de personas desaparecidas incorporadas en el año 1977 es de 2827. 
 
 ## Calculamos la media y el desvio estandard de la edad de desaparecidos
-En función de que la columna de edad no es un campo numérico sino de caracter (incluyendo valores nulos), se aplicó la siguiente fórmula, para crear una nueva columna denominada edad_numerico, conforme la devolución efectuada en el TP 1.
+En función de que la columna de edad no es un campo numérico sino de carácter (incluyendo valores nulos), se aplicó la siguiente fórmula, para crear una nueva columna denominada edad_numerico, conforme la devolución efectuada en el TP 1.
 
 ## Obtenemos ambos estadísticos: 
 ```{r}
 parque_memoria|>
 mutate(edad_numerico=(as.numeric(edad)))|>
-summarise(media_edad = mean(edad_numerico, na.rm = TRUE), desvio_st =sd(edad_numerico, na.rm = TRUE))
+summarise(media_edad = mean(edad_numerico, na.rm = TRUE), desvio_st =sd(edad_numerico, na.rm = TRUE))|>
+knitr::kable(col.names = c ("Promedio de edad de desaparecidos", "Dispersión"))
 ```
 
-Concluimos que:
+Visualizamos que:
+
 1. La edad media de desaparecidos ronda los 28 años y medio de edad. 
-2. Conforme el valor que representa el desvío estandar se puede observar una alta dispersión respecto de la media. 
 
-## Conocemos la cantidad de personas desaparecidas menores a 20 años.
-```{r}
-parque_memoria_menores20|>
-arrange(edad)|>
-knitr::kable(col.names = c ("Edad", "Ano en Monumento", "Sexo", "Nacionalidad", "Ocupacion", "Lugar de Secuestro"))
-```
+2. Conforme el valor que representa el desvío estándar se puede observar una alta dispersión respecto de la media. 
 
 
-## Obtenemos la cantidad de incorporaciones de personas desparecidas en el Parque de Monumento
+## Descubrimos la cantidad de incorporaciones de personas desaparecidas en el Parque de Monumento
 
 ```{r}
 parque_memoria|>
+mutate(ano_en_monumento =(as.numeric(ano_en_monumento)))|>
 group_by(ano_en_monumento)|>
 summarise(n = n())|>
-knitr::kable(col.names = c ("Ano en Monumento", "Cantidad"))
+knitr::kable(col.names = c ("Año en Monumento", "Cantidad"))
 ```
 ## Graficamos sus resultados:
 
 ```{r}
-#| fig.cap = "Evolución de las incorporaciones de desaparecidos al Parque de la Memoria a través de los años. Del gráfico puede observarse un crecimiento exponencial de incorporación de desaparecidos a partir del año 1969 y que llega a su valor máximo en el año 1976 (3845	personas).En adelante, se observa un decrecimiento abrupto de la curva."
+#| fig.cap = "Evolución de las incorporaciones de desaparecidos al Parque de la Memoria a través de los años. Del gráfico puede observarse un crecimiento exponencial de incorporaciones de desaparecidos a partir del año 1969 y que llega a su valor máximo en el año 1976 (3845	personas).En adelante, se observa un decrecimiento abrupto de la curva."
 
 parque_memoria|>
+mutate(ano_en_monumento =(as.numeric(ano_en_monumento)))|>
 group_by(ano_en_monumento)|>
 summarise(n = n())|>
 ggplot(aes(ano_en_monumento, n))+
-geom_point()
+geom_line()
 ```
 
 
 
-## Obtenemos la cantidad de hombres y mujeres desaparecidos
+## Computamos la cantidad de hombres y mujeres desaparecidas
 
 ```{r}
-parque_memoria_sexo<-parque_memoria|>
+parque_memoria|>
 group_by(sexo)|>
-summarise(n = n())
+summarise(n = n())|>
+knitr::kable(col.names = c ("Sexo", "Cantidad"))
 ```
 
+Se puede constatar que la mayor cantidad de desaparecidos fueron hombres (6519) respecto de las mujeres (2230).
 
 ## Conocemos las diferentes edades de los desaparecidos
 
 ```{r}
-parque_memoria_edad<-parque_memoria|>
+parque_memoria|>
 group_by(edad)|>
-summarise(n = n())
+summarise(n = n())|>
+knitr::kable(col.names = c ("Edad", "Cantidad"))
+
 ```
+
+Se puede concluir que la mayor cantidad de personas desaparecidas tenían la edad de 22 años (614 personas).
 
 
 ## Exploramos la cantidad de incorporaciones al Parque de Monumento en rango ascendente por año
@@ -181,25 +194,31 @@ summarise(n = n())
 parque_memoria|>
 group_by(ano_en_monumento)|>
 summarise(n = n())|>
-arrange(n)
-
+arrange(n)|>
+knitr::kable(col.names = c ("Año en monumento", "Cantidad"))
 ```
 
-#Exploramos la cantidad de incorporaciones al Parque de Monumento en rango descendente por año 
+## Descubrimos la cantidad de incorporaciones al Parque de Monumento en rango descendente por año
+
 ```{r}
 parque_memoria|>
 group_by(ano_en_monumento)|>
 summarise(n = n())|>
-arrange(desc(n))
+arrange(desc(n))|>
+knitr::kable(col.names = c ("Año en Monumento", "Cantidad"))
 
 ```
+
+De ambas tablas que anteceden, se desprende que la mayor cantidad de incorporaciones en el Parque de la Memoria se produce en el año 1976 con 3845 nombre de desaparecidos, mientras que el año con menor cantidad de incorporaciones fue en 1970 con la cantidad de 4.
+
 
 
 TRABAJO PRACTICO 2
 
-## Hipótesis 1:La mayor cantidad de desaparecidos menores a 20 años fueron más hombres que mujeres
+## **Hipótesis 1**:
+Proponemos, cómo hipótesis, que la mayor cantidad de personas desaparecidas menores a 20 años fueron en su mayoría hombres
 
-## Vemos los datos:
+## Conocemos los datos:
 
 ```{r}
 parque_memoria_menores20|>
@@ -209,12 +228,12 @@ parque_memoria_menores20|>
   
 ```
 
-Concluimos que se corroboró la hipotesis, dado que los desaparecidos menores a 20 años son 653 masculinos contra 217 femeninas.
+Concluimos que se corroboró la hipótesis, dado que los desaparecidos menores a 20 años son 653 masculinos mientras que las mujeres fueron 217.
 
-## Veamos el gráfico:
+## Graficamos su resultado:
 
 ```{r}
-#| fig.cap = "Observamos que la mayor cantidad de desaparecidos menores a 20 años resultan ser masculinos"
+#| fig.cap = "Observamos que la mayor cantidad de desaparecidos menores a 20 años resultan ser hombres"
 
 parque_memoria_menores20|>
   group_by(sexo) |>
@@ -223,9 +242,12 @@ ggplot(aes(sexo, Cantidad, fill=sexo))+geom_col()
 ```
 
 
-## Hipotesis 2: La mayor cantidad de desparecidos entre las ocupaciones Abogados, Estudiantes y Periodistas, fueron Abogados.
 
-## Veamos la cantidad de desaparecidos en esas ocupaciones
+## **Hipótesis 2**:
+
+Planteamos, como hipótesis, que la mayor cantidad de desaparecidos entre las ocupaciones Abogados, Estudiantes y Periodistas, fueron Abogados.
+
+## Conocemos la cantidad de personas desaparecidas con esas ocupaciones
 
 ```{r}
 parque_memoria|>
@@ -238,11 +260,13 @@ knitr::kable(col.names = c ("Ocupaciones", "Cantidad"))
 
 
 
-Concluimos que la hipotesis planteada resultó errónea ya que la mayor cantidad de desaprecidos tenían como ocupación "Estudiante" (138 desaparecidos).
+Concluimos que la hipótesis planteada resultó errónea ya que la mayor cantidad de desparecidos tenían como ocupación "Estudiante" (138 desaparecidos).
 
-## Veamos el gráfico:
+## Gráficamos su resultado:
 
 ```{r}
+#| fig.cap = "Observamos que la ocupación con mayor cantidad de personas desaparecidas fueron estudiantes"
+
 parque_memoria|>
 filter(ocupaciones %in% c("Abogado","Estudiante", "Periodista"))|>
 group_by(ocupaciones)|>
@@ -253,8 +277,9 @@ geom_col()
 
 ## **Conclusión**:
 Como resultado del análisis de los datos se puede evidenciar:
-1. Que el promedio de edad de los desaparecidos es entre 28 y 29 años de edad; mientras que respecto de los menores a 20 años la cantidad de desaprecidos asciende a 871 personas;
-2. Que la mayor cantidad de desparecidos tenía como ocupación Estudiante respecto a las ocupaciones Abogado y Periodista;
-3. Que la mayor cantidad de desaparecidos fueron hombres en relación con las mujeres.
 
+1. Que el promedio de edad de los desaparecidos es entre 28 y 29 años de edad; mientras que respecto de los menores a 20 años la cantidad de personas desaparecidas asciende a 871.
 
+2. Que la mayor cantidad de desaparecidos tenía como ocupación Estudiante respecto a las ocupaciones Abogado y Periodista.
+
+3. Que la mayor cantidad de desaparecidos fueron hombres.
